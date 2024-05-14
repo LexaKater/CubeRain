@@ -303,7 +303,7 @@ Transform:
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.45, y: 4.27, z: -24.5}
+  m_LocalPosition: {x: -5.45, y: 4.27, z: -48.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -459,8 +459,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _prefab: {fileID: 26496051975634103, guid: 0aec20e49d7f9ac4e8e8eacf9ba34970, type: 3}
   _spawnPosition: {fileID: 1137168449}
-  _poolCapacity: 2
-  _maxSizePool: 4
+  _poolCapacity: 5
+  _maxSizePool: 10
 --- !u!4 &1137168449
 Transform:
   m_ObjectHideFlags: 0
