@@ -1,31 +1,33 @@
-using System.Collections;
 using UnityEngine;
-using UnityEngine.Pool;
+using System.Collections;
+using System;
 
-public class CubeSpawner : MonoBehaviour
+public class CubeSpawner : Spawner<Cube>
 {
-    [SerializeField] private Cube _prefab;
-    [SerializeField] private Transform _spawnPosition;
-    [SerializeField] private int _poolCapacity;
-    [SerializeField] private int _maxSizePool;
-
-    private ObjectPool<Cube> _pool;
     private float _delayBetweenSpawn = 1;
     private bool _isCoroutineWork = true;
 
-    private void Awake()
-    {
-        _pool = new ObjectPool<Cube>(
-            createFunc: () => Instantiate(_prefab),
-            actionOnGet: (cube) => ActionOnGet(cube),
-            actionOnRelease: (cube) => ActionOnRelease(cube),
-            actionOnDestroy: (cube) => Destroy(cube),
-            collectionCheck: true,
-            defaultCapacity: _poolCapacity,
-            maxSize: _maxSizePool);
-    }
+    public event Action<Transform> CubeDeactivated;
 
     private void Start() => StartCoroutine(StartCreate());
+
+    protected override void ActionOnRelease(Cube cube)
+    {
+        cube.LifeEnded -= OnRelease;
+        cube.gameObject.SetActive(false);
+
+        CubeDeactivated?.Invoke(cube.transform);
+    }
+
+    protected override void ActionOnGet(Cube cube)
+    {
+        cube.LifeEnded += OnRelease;
+
+        cube.transform.position = transform.position + new Vector3(GetRandomPosition(), 0f, GetRandomPosition());
+        cube.SetStartColor();
+        cube.SetCollision();
+        cube.gameObject.SetActive(true);
+    }
 
     private IEnumerator StartCreate()
     {
@@ -33,30 +35,10 @@ public class CubeSpawner : MonoBehaviour
 
         while (_isCoroutineWork)
         {
-            GetCube();
+            GetObject();
 
             yield return wait;
         }
-    }
-
-    private void OnRelease(Cube cube) => _pool.Release(cube);
-
-    private void GetCube() => _pool.Get();
-
-    private void ActionOnRelease(Cube cube)
-    {
-        cube.LifeEnded -= OnRelease;
-        cube.gameObject.SetActive(false);
-    }
-
-    private void ActionOnGet(Cube cube)
-    {
-        cube.LifeEnded += OnRelease;
-
-        cube.transform.position = _spawnPosition.position + new Vector3(GetRandomPosition(), 0f, GetRandomPosition());
-        cube.SetColor(Color.white);
-        cube.gameObject.SetActive(true);
-        cube.SetCollision();
     }
 
     private float GetRandomPosition()
@@ -64,6 +46,6 @@ public class CubeSpawner : MonoBehaviour
         float minPosition = -10;
         float maxPosition = 10;
 
-        return Random.Range(minPosition, maxPosition);
+        return UnityEngine.Random.Range(minPosition, maxPosition);
     }
 }

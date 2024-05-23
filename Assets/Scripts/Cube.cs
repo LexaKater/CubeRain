@@ -2,17 +2,12 @@ using UnityEngine;
 using System;
 using System.Collections;
 
-[RequireComponent(typeof(MeshRenderer))]
-public class Cube : MonoBehaviour
+[RequireComponent(typeof(Renderer))]
+public class Cube : Figure
 {
     private bool _isFirstCollision = true;
-    private MeshRenderer _meshRenderer;
-    private float _lifeTime;
-    private Coroutine _coroutine;
 
     public event Action<Cube> LifeEnded;
-
-    private void Awake() => _meshRenderer = GetComponent<MeshRenderer>();
 
     private void OnCollisionEnter(Collision collision)
     {
@@ -21,7 +16,8 @@ public class Cube : MonoBehaviour
             if (_isFirstCollision)
             {
                 _isFirstCollision = false;
-                SetColor(Color.green);
+                _renderer.material.color = Color.green;
+
                 SetLifeTime();
 
                 if (_coroutine != null)
@@ -32,18 +28,18 @@ public class Cube : MonoBehaviour
         }
     }
 
-    public void SetColor(Color color) => _meshRenderer.material.color = color;
-
     public void SetCollision(bool isFirstCollision = true) => _isFirstCollision = isFirstCollision;
 
-    private IEnumerator StartLifeCycle()
+    public override void SetStartColor() => _renderer.material.color = Color.white;
+
+    protected override IEnumerator StartLifeCycle()
     {
         yield return new WaitForSeconds(_lifeTime);
 
         LifeEnded?.Invoke(this);
     }
 
-    private void SetLifeTime()
+    protected override void SetLifeTime()
     {
         float minLifeTime = 2;
         float maxLifeTime = 7;
